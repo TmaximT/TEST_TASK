@@ -16,7 +16,7 @@ class Binary_symmetric_channel
 {
 private:
 
-	double probability;//вероятность ошибки в двоичном симметричном канале
+	double probability;//error probability in binary symmetric channel
 
 	char Reverse_bit(const char& bit) const;
 
