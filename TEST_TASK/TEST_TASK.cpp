@@ -220,7 +220,6 @@ void FillFile(const string& file, Codec& codec)
 
 		fs << probability << "\t" << ErrorProbabilityPerBit << "\n";
 
-		cout << probability << endl;
 	}
 
 	//Отдельная проверка
