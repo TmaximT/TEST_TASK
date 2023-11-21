@@ -156,7 +156,7 @@ string Codec::Decode(string& bits)
 
 	int delta = bits.size() % polynoms.size();
 
-	for (int i = 0; i < delta; i++)//Добавляем нули в конец входного сообщения для декодирования, в случае когда длина входного сообщения не делится нацело на количество выходов кодера
+	for (int i = 0; i < delta; i++)//We add zeros to the end of the input message for decoding, in the case when the length of the input message is not divided entirely by the number of outputs of the encoder
 	{
 		bits.push_back(0);
 	}
@@ -251,11 +251,11 @@ void Codec::FillOutPuts()
 {
 	int max_index = shift_register_length - 1;
 
-	output_variants.resize(1 << (max_index)); // количество всех возможных комбинаций регистра сдвига
+	output_variants.resize(1 << (max_index));// the number of all possible combinations of the shift register
 
 	for (int i = 0; i < output_variants.size(); i++)
 	{
-		for (int j = 0; j < polynoms.size(); j++) // количество генераторных полиномов определяет размерность выходных слов (количество выходов)
+		for (int j = 0; j < polynoms.size(); j++)// the number of generator polynomials determines the dimension of the output words (number of outputs)
 		{
 			int state_reg = i;
 
