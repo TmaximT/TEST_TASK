@@ -28,7 +28,7 @@ private:
 
 	int shift_register_length;
 
-	vector<pair<string, string>> output_variants;//всевозможные варианты регистра состояний (Например: для регистра сдвига длиной 3 бита, получаем 00, 01, 10, 11)
+	vector<pair<string, string>> output_variants;//all possible variants of the state register (For example: for a shift register with a length of 3 bits, we get 00, 01, 10, 11)
 
 	string& Output_for_node(const int& state_node, const bool& input_reg);
 
