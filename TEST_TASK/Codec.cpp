@@ -285,3 +285,9 @@ void Codec::FillOutPuts()
 		}
 	}
 }
+
+Codec::~Codec()
+{
+	polynoms.~vector();
+	output_variants.~vector();
+}
