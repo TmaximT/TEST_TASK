@@ -22,6 +22,8 @@ public:
 
 	string Decode(string& bits);
 
+	~Codec();
+
 private:
 
 	vector<int> polynoms;
