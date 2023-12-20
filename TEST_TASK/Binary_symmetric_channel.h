@@ -6,7 +6,7 @@
 
 #define END_PROBABILITY 1.0
 #define STEP_OF_PROBABILITY 0.01
-#define COUNT_OF_TESTS 100
+#define COUNT_OF_TESTS 1000
 #define LENGTH 100
 
 using namespace std;

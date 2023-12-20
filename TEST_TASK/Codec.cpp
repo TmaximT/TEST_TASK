@@ -1,7 +1,6 @@
 #include "Codec.h"
 
 
-
 int highest_bit_index(const vector<int>& polynoms)
 {
 	int max = *max_element(polynoms.begin(), polynoms.end());
@@ -37,13 +36,21 @@ int Hamming_Distance(const string& first, const string& second)
 
 Codec::Codec(const vector<int>& polynoms)
 {
-	for (int i = 0; i < polynoms.size(); i++)
+	try
 	{
-		if (polynoms[i] <= 0)
+		for (int i = 0; i < polynoms.size(); i++)
 		{
-			throw exception("The value of the polynomial cannot be non-positive");
+			if (polynoms[i] <= 0)
+			{
+				throw exception("The value of the polynomial cannot be non-positive");
+			}
 		}
 	}
+	catch (const exception& ex)
+	{
+		cout << ex.what() << endl;
+	}
+	
 
 	this->polynoms = polynoms;
 
@@ -79,41 +86,13 @@ string Codec::Encode(const string& msg)
 	return code;
 }
 
-void Codec::UpdateGrid(vector<vector<int>>& Grid, const string& word, const int& state)
+void Codec::UpdateGridAndMetrics(vector<vector<int>>& Grid, vector<vector<int>>& Metrics, vector<int>& Metrics_Column, const string& word)
 {
+
 	vector<int> Grid_Column;
+	Grid_Column.reserve(output_variants.size());
+	const int mask = (1 << (shift_register_length - 1)) - 1;// 011..1
 
-	const int mask = (1 << (shift_register_length - 1)) - 1;
-
-	for (int i = 0; i < output_variants.size(); i++)
-	{
-		int next_state = i;
-
-		int current_state1 = (next_state << (shift_register_length - 2)) & mask;
-		int current_state2 = ((next_state << (shift_register_length - 2)) | 1) & mask;
-
-		int input = next_state >> (shift_register_length - 2) & 1;
-
-		int dist1 = Hamming_Distance(Output_for_node(current_state1, input), word);
-		int dist2 = Hamming_Distance(Output_for_node(current_state2, input), word);
-
-		if (dist1 < dist2)
-		{
-			Grid_Column.push_back(current_state1);
-		}
-		else
-		{
-			Grid_Column.push_back(current_state2);
-		}
-	}
-
-	Grid.push_back(Grid_Column);
-}
-
-void Codec::UpdateMetrics(vector<vector<int>>& Metrics, vector<int>& Metrics_Column ,const string& word)
-{
-
-	const int mask = (1 << (shift_register_length - 1)) - 1;
 
 	for (int i = 0; i < output_variants.size(); i++)
 	{
@@ -129,22 +108,29 @@ void Codec::UpdateMetrics(vector<vector<int>>& Metrics, vector<int>& Metrics_Col
 
 		if (dist1 < dist2)
 		{
+			Grid_Column.emplace_back(current_state1);
 			Metrics_Column[i] = dist1;
 		}
 		else
 		{
+			Grid_Column.emplace_back(current_state2);
 			Metrics_Column[i] = dist2;
 		}
 	}
 
-	Metrics.push_back(Metrics_Column);
+	Grid.emplace_back(Grid_Column);
+	Metrics.emplace_back(Metrics_Column);
 }
 
 string Codec::Decode(string& bits)
 {
 	vector<vector<int>> Grid;
 
+	Grid.reserve(bits.size());
+
 	vector<vector<int>> Metrics;
+
+	Metrics.reserve(bits.size());
 
 	for (int i = 0; i < bits.size(); i++)
 	{
@@ -161,11 +147,7 @@ string Codec::Decode(string& bits)
 		bits.push_back(0);
 	}
 
-	vector<int> brackets(output_variants.size(), numeric_limits<int>::max());
-
-	vector<int> Metrics_Column = brackets;
-
-	int state = 0;
+	vector<int> Metrics_Column(output_variants.size());
 
 	int word_length = polynoms.size();
 
@@ -173,11 +155,8 @@ string Codec::Decode(string& bits)
 	{
 		string word(bits, i, word_length);
 
-		UpdateGrid(Grid, word, state);
+		UpdateGridAndMetrics(Grid, Metrics, Metrics_Column, word);
 
-		UpdateMetrics(Metrics, Metrics_Column, word);
-
-		state++;
 	}
 
 	vector<string> reverse_decodes(output_variants.size());
@@ -228,7 +207,7 @@ string Codec::Decode(string& bits)
 
 }
 
-string& Codec::Output_for_node(const int& state_node, const bool& input_reg)
+string& Codec::Output_for_node(const int& state_node, const bool& input_reg)////////////////
 {
 	int index = state_node;
 

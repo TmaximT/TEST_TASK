@@ -4,6 +4,8 @@
 #include <fstream>
 #include "Binary_symmetric_channel.h"
 #include <chrono>
+#include <thread>
+#include <map>
 
 
 using namespace std;
@@ -200,11 +202,124 @@ string Random_message(const int& length)
 
 void FillFile(const string& file, Codec& codec)
 {
-	fstream fs;
+	vector<double> mp;
+	mp.resize((END_PROBABILITY / STEP_OF_PROBABILITY) + 1);
 
-	fs.open(file, fstream::out);
+	const int SIZE = 4;
 
-	for (double probability = 0.0; probability < END_PROBABILITY; probability += STEP_OF_PROBABILITY)
+	thread th1([&]()
+		{
+			for (int i = 0; i < (END_PROBABILITY / STEP_OF_PROBABILITY) / SIZE; i++)
+			{
+				double probability = static_cast<double>(i * STEP_OF_PROBABILITY);
+				Binary_symmetric_channel BSC(probability);
+
+				double ErrorProbabilityPerBit = 0;
+
+				for (int i = 0; i < COUNT_OF_TESTS; i++)
+				{
+					string r_m = Random_message(LENGTH);
+					ErrorProbabilityPerBit += BSC.ErrorProbabilityForBit(codec, r_m);
+				}
+
+				ErrorProbabilityPerBit /= COUNT_OF_TESTS;
+
+				cout << probability << "\t" << ErrorProbabilityPerBit << endl;
+
+				mp[i] = ErrorProbabilityPerBit;
+
+			}
+		});
+
+	thread th2([&]()
+		{
+			
+
+			for (int i =  ((END_PROBABILITY / STEP_OF_PROBABILITY) / SIZE); i < 2 * ((END_PROBABILITY / STEP_OF_PROBABILITY) / SIZE); i++)
+			{
+				double probability = static_cast<double>(i * STEP_OF_PROBABILITY);
+
+				Binary_symmetric_channel BSC(probability);
+
+				double ErrorProbabilityPerBit = 0;
+
+				for (int i = 0; i < COUNT_OF_TESTS; i++)
+				{
+					string r_m = Random_message(LENGTH);
+					ErrorProbabilityPerBit += BSC.ErrorProbabilityForBit(codec, r_m);
+				}
+
+				ErrorProbabilityPerBit /= COUNT_OF_TESTS;
+
+				cout << probability << "\t" << ErrorProbabilityPerBit << endl;
+
+				mp[i] = ErrorProbabilityPerBit;
+
+			}
+		});
+
+	thread th3([&]()
+		{
+			
+
+			for (int i = 2 * ((END_PROBABILITY / STEP_OF_PROBABILITY) / SIZE); i < 3 * ((END_PROBABILITY / STEP_OF_PROBABILITY) / SIZE); i++)
+			{
+				double probability = static_cast<double>(i * STEP_OF_PROBABILITY);
+
+				Binary_symmetric_channel BSC(probability);
+
+				double ErrorProbabilityPerBit = 0;
+
+				for (int i = 0; i < COUNT_OF_TESTS; i++)
+				{
+					string r_m = Random_message(LENGTH);
+					ErrorProbabilityPerBit += BSC.ErrorProbabilityForBit(codec, r_m);
+				}
+
+				ErrorProbabilityPerBit /= COUNT_OF_TESTS;
+
+				cout << probability << "\t" << ErrorProbabilityPerBit << endl;
+
+				mp[i] = ErrorProbabilityPerBit;
+
+			}
+		});
+
+	thread th4([&]()
+		{
+			
+
+			for (int i = 3 * ((END_PROBABILITY / STEP_OF_PROBABILITY) / SIZE); i < 4 * ((END_PROBABILITY / STEP_OF_PROBABILITY) / SIZE); i++)
+			{
+				double probability = static_cast<double>(i * STEP_OF_PROBABILITY);
+
+				Binary_symmetric_channel BSC(probability);
+
+				double ErrorProbabilityPerBit = 0;
+
+				for (int i = 0; i < COUNT_OF_TESTS; i++)
+				{
+					string r_m = Random_message(LENGTH);
+					ErrorProbabilityPerBit += BSC.ErrorProbabilityForBit(codec, r_m);
+				}
+
+				ErrorProbabilityPerBit /= COUNT_OF_TESTS;
+
+				cout << probability << "\t" << ErrorProbabilityPerBit << endl;
+
+				mp[i] = ErrorProbabilityPerBit;
+
+			}
+		});
+
+	//cout << th1.get_id() << endl;
+	//cout << th2.get_id() << endl;
+	//cout << th3.get_id() << endl;
+	//cout << th4.get_id() << endl;
+
+
+
+	/*for (double probability = 0.0; probability < END_PROBABILITY; probability += STEP_OF_PROBABILITY)
 	{
 		Binary_symmetric_channel BSC(probability);
 
@@ -218,13 +333,14 @@ void FillFile(const string& file, Codec& codec)
 
 		ErrorProbabilityPerBit /= COUNT_OF_TESTS;
 
-		fs << probability << "\t" << ErrorProbabilityPerBit << "\n";
+		cout << probability << "\t" << ErrorProbabilityPerBit << endl;
 
-	}
+		mp[probability] = ErrorProbabilityPerBit;
 
-	//Отдельная проверка
+	}*/
 
-	double probability = 1.0;
+
+	double probability = static_cast<double>((END_PROBABILITY / STEP_OF_PROBABILITY) * STEP_OF_PROBABILITY);
 
 	Binary_symmetric_channel BSC(probability);
 
@@ -238,8 +354,45 @@ void FillFile(const string& file, Codec& codec)
 
 	ErrorProbabilityPerBit /= COUNT_OF_TESTS;
 
-	fs << probability << "\t" << ErrorProbabilityPerBit << "\n";
+	cout << probability << endl;
 
+	mp[END_PROBABILITY / STEP_OF_PROBABILITY] = ErrorProbabilityPerBit;
+
+	/*for (double probability = 0.0; probability < END_PROBABILITY; probability += STEP_OF_PROBABILITY)
+	{
+		Binary_symmetric_channel BSC(probability);
+
+		double ErrorProbabilityPerBit = 0;
+
+		for (int i = 0; i < COUNT_OF_TESTS; i++)
+		{
+			string r_m = Random_message(LENGTH);
+			ErrorProbabilityPerBit += BSC.ErrorProbabilityForBit(codec, r_m);
+		}
+
+		ErrorProbabilityPerBit /= COUNT_OF_TESTS;
+
+		cout << probability << endl;
+
+		fs << probability << "\t" << ErrorProbabilityPerBit << "\n";
+
+	}*/
+
+	th1.join();
+	th2.join();
+	th3.join();
+	th4.join();
+
+
+
+	fstream fs;
+
+	fs.open(file, fstream::out);
+
+	for (int i = 0; i < (END_PROBABILITY / STEP_OF_PROBABILITY) + 1; i++)
+	{
+		fs << i * STEP_OF_PROBABILITY << "\t" << mp[i] << endl;
+	}
 
 	fs.close();
 }

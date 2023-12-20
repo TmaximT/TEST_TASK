@@ -38,8 +38,6 @@ private:
 
 	void FillOutPuts();
 
-	void UpdateMetrics(vector<vector<int>>& Metrics, vector<int>& Metrics_Column, const string& word);
-
-	void UpdateGrid(vector<vector<int>>& Grid, const string& word, const int& state);
+	void UpdateGridAndMetrics(vector<vector<int>>& Grid, vector<vector<int>>& Metrics, vector<int>& Metrics_Column, const string& word);
 
 };
